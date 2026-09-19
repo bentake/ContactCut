@@ -1,0 +1,8 @@
+{
+  "model": "CC-Auto (H_GLOBAL)",
+  "trained_on": "FlyWire TRAIN (in-domain)",
+  "phi": ["z(f_smaller)", "-z(log1p(f_cutarea))"],
+  "score_formula": "theta @ phi  (argmax within the connectivity tier)",
+  "selected_C": 1.0,
+  "theta": [0.24119453191788312, 0.09229502881828866]
+}

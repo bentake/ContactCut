@@ -1,0 +1,8 @@
+{
+  "model": "CC-Auto (H_GLOBAL)",
+  "trained_on": "MICrONS TRAIN",
+  "phi": ["z(f_smaller)", "-z(log1p(f_cutarea))"],
+  "score_formula": "theta @ phi  (argmax within the connectivity tier)",
+  "selected_C": 1.0,
+  "theta": [0.22145094895946582, 0.045219894492113485]
+}
