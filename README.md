@@ -1,15 +1,13 @@
-# ContactCut: 3D-Native Intervention Selection Framework for False-Merge Correction in Connectomics
+# ContactCut
+
+**3D-Native Intervention Selection Framework for False-Merge Correction in Connectomics**
 
 [Byunghyun Ko](https://bentake.github.io/)¹, [Won-Ki Jeong](https://hvcl.korea.ac.kr/?page_id=359)², [Chaoli Wang](https://sites.nd.edu/chaoli-wang/)¹
 
-¹ University of Notre Dame, Notre Dame, IN, USA
-² Korea University, Seoul, Korea
+¹ Department of Computer Science and Engineering, University of Notre Dame, Notre Dame, IN, USA
+² Department of Computer Science and Engineering, Korea University, Seoul, Korea
 
-This is the official implementation of the paper *"ContactCut: 3D-Native Intervention Selection Framework for False-Merge Correction in Connectomics"*.
-
-<p align="center">
-  <img src="Figures/methodology.png" alt="ContactCut overview" width="700">
-</p>
+![overview](Figures/methodology.png)
 
 Overview of ContactCut. CC-Auto performs learned single-contact selection, while CC-Search expands the
 intervention space with bounded contact pairs and returns an H_FIXED base with up to five ranked
@@ -25,13 +23,31 @@ cue `x0`, it enumerates nearby native **contacts**, assigns each contact's endpo
 opposing terminals, and evaluates the complete partition induced by a fixed seeded *s–t* min-cut. It
 selects among these partitions in two modes:
 
-- **CC-Auto** — a learned ranker for automatic single-contact selection.
+- **CC-Auto** — a learned two-feature, two-parameter ranker for automatic single-contact selection.
 - **CC-Search** — bounded paired-contact search + a greedy facility-location panel (`K = 5`) + a learned
   PairLogit ranker, producing a compact panel for proofreading or downstream selection.
 
-ContactCut is ground-truth-free at inference. The historical reference (the two post-edit
+ContactCut is CPU-only and ground-truth-free at inference; the historical reference (the two post-edit
 descendant neurons) is used only to *label* training preferences and to *score* final partitions. Both
 learned rankers transfer from MICrONS to FlyWire without retraining.
+
+## Method
+
+![Supervoxel contacts and candidate selection](Figures/figure1.png)
+
+Supervoxel contacts and candidate selection. (a) Supervoxels correspond to graph nodes.
+The voxel faces shared by two supervoxels form a contact, represented by a graph edge. (b) Candidate
+contacts have centroids within 500 nm of the localized error cue `x0` (red). Shown candidate centroids
+are green; the crossed marker denotes an excluded contact.
+
+See `Figures/methodology.png`. In brief: build the native contact graph (node mass = native voxel
+count, edge capacity = shared contact area), enumerate candidate contacts within `R = 500 nm` of `x0`,
+and induce a partition per contact with a seeded *s–t* min-cut (terminal capacity
+`C∞ = 8(2·Σ c_e + 1)`). **CC-Auto** ranks within the best connectivity tier by
+`theta · [z(f_s), −z(log(1 + f_c))]`. **H_FIXED** is the fixed-weight counterpart that seeds
+**CC-Search**, which samples up to `B = 45` contact pairs, selects `K = 5` diverse alternatives by
+facility location, and re-orders the base + 5 panel with a Bradley–Terry PairLogit ranker. Full
+formulas and constants live in `contactcut/{pipeline,search,pairlogit}.py`.
 
 ## Experiments
 
@@ -94,20 +110,9 @@ Schema (`contactcut/data.py`):
 | `dataset` | str | `"microns"` or `"flywire"` |
 
 These are materialized from the public MICrONS / FlyWire version history via CAVE / ChunkedGraph. Data
-access, licensing, and materialization are governed by those projects. **This repository does not
+access, licensing, and materialization are governed by those projects; **this repository does not
 redistribute their data.** Once the `.npz` files exist for a split, the commands above reproduce the
 paper numbers with no further inputs.
-
-## Method
-
-See `Figures/methodology.png`. In brief: build the native contact graph (node mass = native voxel
-count, edge capacity = shared contact area), enumerate candidate contacts within `R = 500 nm` of `x0`,
-and induce a partition per contact with a seeded *s–t* min-cut (terminal capacity
-`C∞ = 8(2·Σ c_e + 1)`). **CC-Auto** ranks within the best connectivity tier by
-`theta · [z(f_s), −z(log(1 + f_c))]`. **H_FIXED** is the fixed-weight counterpart that seeds
-**CC-Search**, which samples up to `B = 45` contact pairs, selects `K = 5` diverse alternatives by
-facility location, and re-orders the base + 5 panel with a Bradley–Terry PairLogit ranker. Full
-formulas and constants live in `contactcut/{pipeline,search,pairlogit}.py`.
 
 ## Dependencies
 
@@ -121,6 +126,7 @@ Byunghyun Ko — bko2@nd.edu
 
 This research was supported in part by the U.S. National Science Foundation through grant OAC-2104158
 and the U.S. National Institutes of Health through grant 7R01HL177814.
+
 ## Citation
 
 TBA
