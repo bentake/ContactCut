@@ -1,6 +1,6 @@
-# ContactCut
+# ContactCut: 
 
-**3D-Native Intervention Selection Framework for False-Merge Correction in Connectomics**
+**A Partition-Aware Contact Selection Framework for False-Merge Correction in Connectomics**
 
 [Byunghyun Ko](https://bentake.github.io/)¹, [Won-Ki Jeong](https://hvcl.korea.ac.kr/?page_id=359)², [Chaoli Wang](https://sites.nd.edu/chaoli-wang/)¹
 
@@ -10,7 +10,7 @@
 ![overview](Figures/methodology.png)
 
 Overview of ContactCut. CC-Auto performs learned single-contact selection, while CC-Search expands the
-intervention space with bounded contact pairs and returns an H_FIXED base with up to five ranked
+candidate space with bounded contact pairs and returns an H_FIXED base with up to five ranked
 alternatives.
 
 ## Introduction
@@ -18,8 +18,8 @@ alternatives.
 Localized false-merge correction requires turning an identified error into an executable native 3D
 partition, but neither intermediate correction predictions nor seeded graph solvers alone determine
 which native source–sink constraints should define that partition. ContactCut formulates this as a
-**3D-native intervention selection** problem: given a falsely merged object and a localized interface
-cue `x0`, it enumerates nearby native **contacts**, assigns each contact's endpoint supervoxels to
+**3D-native partition-aware contact selection** problem: given a falsely merged object and a localized
+interface cue `x0`, it enumerates nearby native **contacts**, assigns each contact's endpoint supervoxels to
 opposing terminals, and evaluates the complete partition induced by a fixed seeded *s–t* min-cut. It
 selects among these partitions in two modes:
 
@@ -28,7 +28,7 @@ selects among these partitions in two modes:
   PairLogit ranker, producing a compact panel for proofreading or downstream selection.
 
 ContactCut is CPU-only and ground-truth-free at inference; the historical reference (the two post-edit
-descendant neurons) is used only to *label* training preferences and to *score* final partitions. Both
+descendants) is used only to *label* training preferences and to *score* final partitions. Both
 learned rankers transfer from MICrONS to FlyWire without retraining.
 
 ## Method
@@ -41,13 +41,16 @@ contacts have centroids within 500 nm of the localized error cue `x0` (red). Sho
 are green; the crossed marker denotes an excluded contact.
 
 See `Figures/methodology.png`. In brief: build the native contact graph (node mass = native voxel
-count, edge capacity = shared contact area), enumerate candidate contacts within `R = 500 nm` of `x0`,
+count, edge capacity = shared-face count). A contact centroid is the arithmetic mean of its shared-face
+centers in physical coordinates. Enumerate contacts whose centroids lie within `R = 500 nm` of `x0`,
 and induce a partition per contact with a seeded *s–t* min-cut (terminal capacity
 `C∞ = 8(2·Σ c_e + 1)`). **CC-Auto** ranks within the best connectivity tier by
-`theta · [z(f_s), −z(log(1 + f_c))]`. **H_FIXED** is the fixed-weight counterpart that seeds
-**CC-Search**, which samples up to `B = 45` contact pairs, selects `K = 5` diverse alternatives by
-facility location, and re-orders the base + 5 panel with a Bradley–Terry PairLogit ranker. Full
-formulas and constants live in `contactcut/{pipeline,search,pairlogit}.py`.
+`theta · [z(f_s), −z(log(1 + f_c))]`. Here `f_s` is the smaller-side native-voxel fraction, and `f_c` is
+the cut contact size: the sum of shared-face counts over all edges crossing the partition.
+**H_FIXED** is the deterministic, non-learned base for **CC-Search**, which samples up to `B = 45`
+contact pairs and selects `K = 5` diverse alternatives by facility location. PairLogit, a pairwise
+logistic ranker, orders the alternatives; the H_FIXED base remains available. Full formulas and
+constants live in `contactcut/{pipeline,search,pairlogit}.py`.
 
 ## Experiments
 
