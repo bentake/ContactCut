@@ -1,11 +1,13 @@
-# ContactCut: 
-
-**A Partition-Aware Contact Selection Framework for False-Merge Correction in Connectomics**
+# ContactCut: A Partition-Aware Contact Selection Framework for False-Merge Correction in Connectomics
 
 [Byunghyun Ko](https://bentake.github.io/)¹, [Won-Ki Jeong](https://hvcl.korea.ac.kr/?page_id=359)², [Chaoli Wang](https://sites.nd.edu/chaoli-wang/)¹
 
 ¹ Department of Computer Science and Engineering, University of Notre Dame, Notre Dame, IN, USA
 ² Department of Computer Science and Engineering, Korea University, Seoul, Korea
+
+## Description
+
+This repository contains the official implementation of the paper **"ContactCut: A Partition-Aware Contact Selection Framework for False-Merge Correction in Connectomics"**.
 
 ![overview](Figures/methodology.png)
 
